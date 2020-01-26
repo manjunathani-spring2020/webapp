@@ -10,6 +10,15 @@ jobs:
           name: Running tests
           command: |
             echo "Hello World"
+  build:
+    docker:
+      - image: circleci/python:3.6.4
+    steps:
+      - checkout
+      - run:
+          name: Running builds
+          command: |
+            echo "Hello World"
 
 
 workflows:
@@ -17,3 +26,6 @@ workflows:
   pr-check-workflow:
     jobs:
       - pr_check
+  build-deploy-workflow:
+    jobs:
+      - build
