@@ -1,6 +1,7 @@
+---
 version: 2
 jobs:
-  build:
+  pr_check:
     docker:
       - image: circleci/python:3.6.4
     steps:
@@ -9,3 +10,10 @@ jobs:
           name: Running tests
           command: |
             echo "Hello World"
+
+
+workflows:
+  version: 2
+  pr-check-workflow:
+    jobs:
+      - pr_check

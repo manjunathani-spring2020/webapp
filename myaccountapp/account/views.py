@@ -25,7 +25,7 @@ def registration_view(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', PUT])
+@api_view(['GET', ])
 @authentication_classes([BasicAuthentication, ])
 @permission_classes((IsAuthenticated,))
 def api_detail_view(request):
