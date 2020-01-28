@@ -1,31 +1,52 @@
----
 version: 2
 jobs:
-  pr_check:
+  build:
     docker:
-      - image: circleci/python:3.6.4
+      - image: circleci/python:3.7.6
+      - image: circleci/mysql:8.0.4
+        environment:
+          MYSQL_ROOT_PASSWORD: rootpw
+          MYSQL_DATABASE: test_db
+          MYSQL_USER: user
+          MYSQL_PASSWORD: passw0rd
+
     steps:
       - checkout
+      - run:
+          name: Install django
+          command: |
+            sudo pip install django==3.0.2
+
+      - run:
+          name: Install django rest framework
+          command: |
+            sudo pip install djangorestframework
+
+      - run:
+          name: Install mysqlclient
+          command: |
+            sudo pip install mysqlclient
+
+      - run:
+          name: Install bcrypt
+          command: |
+            sudo pip install bcrypt==3.1.7
+
+      - run:
+      # Our primary container isn't MYSQL so run a sleep command until it's ready.
+          name: Waiting for MySQL to be ready
+          command: |
+            for i in `seq 1 10`;
+            do
+              nc -z 127.0.0.1 3306 && echo Success && exit 0
+              echo -n .
+              sleep 1
+            done
+            echo Failed waiting for MySQL && exit 1
+
       - run:
           name: Running tests
           command: |
-            echo "Hello World"
-  build:
-    docker:
-      - image: circleci/python:3.6.4
-    steps:
-      - checkout
-      - run:
-          name: Running builds
-          command: |
-            echo "Hello World"
-
-
-workflows:
-  version: 2
-  pr-check-workflow:
-    jobs:
-      - pr_check
-  build-deploy-workflow:
-    jobs:
-      - build
+            ls -a
+            cd myaccountapp
+            python3 manage.py test
