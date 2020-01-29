@@ -2,9 +2,11 @@ from rest_framework import serializers
 from bill.models import Bill
 
 
-# import pdb
-
 class BillSerializer(serializers.ModelSerializer):
+    categories = serializers.ListField(
+        child=serializers.CharField()
+    )
+
     class Meta:
         model = Bill
         fields = ['vendor', 'bill_date', 'due_date', 'amount_due', 'categories', 'payment_status']

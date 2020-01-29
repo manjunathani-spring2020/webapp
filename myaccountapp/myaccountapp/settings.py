@@ -90,7 +90,7 @@ DATABASES = {
         'NAME': 'acc_data',
         'USER': 'root',
         'PASSWORD':'Comp23329002@',
-        'HOST':'localhost',
+        'HOST':'127.0.0.1',
         'PORT':'3306',
     }
 }
