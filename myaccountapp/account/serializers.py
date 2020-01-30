@@ -57,10 +57,9 @@ class UserSerializer(serializers.ModelSerializer):
 class UserSerializer2(serializers.ModelSerializer):
     class Meta:
         model = Account
-        fields = ['uuid_id', 'email', 'first_name', 'last_name', 'password']
+        fields = ['first_name', 'last_name', 'password']
 
     def update(self, instance, validated_data):
-        instance.email = validated_data.get('email', instance.email)
         instance.first_name = validated_data.get('first_name', instance.first_name)
         instance.last_name = validated_data.get('last_name', instance.last_name)
         password = self.validated_data['password']

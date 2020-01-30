@@ -15,10 +15,8 @@ from account.models import Account
 def api_create_bill_view(request):
     bill_post = Bill(owner_id=request.user)
     account_user = Account.objects.get(email=request.user)
-    # bill_post = Bill(account_user=request.user)
 
     if request.method == 'POST':
-        # serializer = BillSerializer(context= bill_post, data=request.data)
         serializer = BillSerializer(bill_post, data=request.data)
         data = {}
         if serializer.is_valid():
@@ -58,73 +56,12 @@ def api_get_all_bills_view(request):
         return Response(serializer.data)
 
 
-#
-# @api_view(['DELETE', ])
-# @authentication_classes([BasicAuthentication, ])
-# @permission_classes((IsAuthenticated,))
-# def api_delete_bill_view(request, uuid_bill_id):
-#     try:
-#         bill = Bill.objects.get(uuid_bill_id=uuid_bill_id)
-#     except Bill.DoesNotExist:
-#         return Response(status=status.HTTP_404_NOT_FOUND)
-#
-#     user = request.user
-#     if bill.owner_id != user:
-#         return Response({'response': "You don't have permission to delete that."})
-#
-#     if request.method == 'DELETE':
-#         operation = bill.delete()
-#         data = {}
-#         if operation:
-#             data['response'] = 'successfully deleted a new bill.'
-#         return Response(data=data)
-#
-#
-# @api_view(['GET', ])
-# @authentication_classes([BasicAuthentication, ])
-# @permission_classes((IsAuthenticated,))
-# def api_single_get_bill_view(request, uuid_bill_id):
-#     try:
-#         bill = Bill.objects.get(uuid_bill_id=uuid_bill_id)
-#     except Bill.DoesNotExist:
-#         return Response(status=status.HTTP_404_NOT_FOUND)
-#
-#     user = request.user
-#     if bill.owner_id != user:
-#         return Response({'response': "You don't have permission to get that."})
-#
-#     if request.method == 'GET':
-#         serializer = BillGetSerializer(bill)
-#         return Response(serializer.data)
-#
-#
-# @api_view(['PUT', ])
-# @authentication_classes([BasicAuthentication, ])
-# @permission_classes((IsAuthenticated,))
-# def api_update_blog_view(request, uuid_bill_id):
-#     try:
-#         bill = Bill.objects.get(uuid_bill_id=uuid_bill_id)
-#     except Bill.DoesNotExist:
-#         return Response(status=status.HTTP_404_NOT_FOUND)
-#
-#     user = request.user
-#     if bill.owner_id != user:
-#         return Response({'response': "You don't have permission to edit that."})
-#
-#     if request.method == 'PUT':
-#         serializer = BillSerializer(bill, data=request.data)
-#         data = {}
-#         if serializer.is_valid():
-#             serializer.save()
-#             data['response'] = 'successfully updated a new bill.'
-#             return Response(data=data)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 @api_view(['GET', 'PUT', 'DELETE', ])
 @authentication_classes([BasicAuthentication, ])
 @permission_classes((IsAuthenticated,))
 def api_get_put_delete_bill_view(request, uuid_bill_id):
+    account_user = Account.objects.get(email=request.user)
+
     try:
         bill = Bill.objects.get(uuid_bill_id=uuid_bill_id)
     except Bill.DoesNotExist:
@@ -132,7 +69,8 @@ def api_get_put_delete_bill_view(request, uuid_bill_id):
                         status=status.HTTP_404_NOT_FOUND)
 
     if bill.owner_id != request.user:
-        return Response({'response': "You don't have permissions to get/update/delete that bill."})
+        return Response({'response': "You don't have permissions to get/update/delete that bill."},
+                        status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = BillGetSerializer(bill)
@@ -142,9 +80,23 @@ def api_get_put_delete_bill_view(request, uuid_bill_id):
         serializer = BillSerializer(bill, data=request.data)
         data = {}
         if serializer.is_valid():
+            categories_list = serializer.validated_data['categories']
+            if len(categories_list) != len(set(categories_list)):
+                return Response({'response': "Categories must be unique."},
+                                status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
             data['response'] = 'successfully updated a new bill.'
-            return Response(data=data)
+            data['uuid_bill_id'] = bill.uuid_bill_id
+            data['created_ts'] = bill.created_ts
+            data['updated_ts'] = bill.updated_ts
+            data['owner_id'] = account_user.uuid_id
+            data['vendor'] = bill.vendor
+            data['bill_date'] = bill.bill_date
+            data['due_date'] = bill.due_date
+            data['amount_due'] = bill.amount_due
+            data['categories'] = bill.categories
+            data['payment_status'] = bill.payment_status
+            return Response(data=data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
@@ -152,4 +104,4 @@ def api_get_put_delete_bill_view(request, uuid_bill_id):
         data = {}
         if operation:
             data['response'] = 'successfully deleted a new bill.'
-        return Response(data=data)
+            return Response(data=data, status=status.HTTP_204_NO_CONTENT)
