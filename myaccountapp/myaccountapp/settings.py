@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'account',
+    'bill',
     'rest_framework',
     'rest_framework.authtoken',
 ]
@@ -89,7 +90,7 @@ DATABASES = {
         'NAME': 'acc_data',
         'USER': 'root',
         'PASSWORD':'Comp23329002@',
-        'HOST':'localhost',
+        'HOST':'127.0.0.1',
         'PORT':'3306',
     }
 }
