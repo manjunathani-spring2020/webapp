@@ -45,5 +45,5 @@ python manage.py test
 ```
 
 ## Git Instructions
-* Create your own fork or clone from
+* Create your own fork or clone
   https://github.com/manjunathani-spring2020/webapp
