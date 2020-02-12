@@ -14,6 +14,8 @@ import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = "/media/"
 
 
 # Quick-start development settings - unsuitable for production
@@ -39,11 +41,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'account',
     'bill',
+    'file',
     'rest_framework',
     'rest_framework.authtoken',
 ]
 
 AUTH_USER_MODEL = 'account.Account'
+AUTH_FILE_MODEL = 'file.File'
+AUTH_BILL_MODEL = 'bill.Bill'
 
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
