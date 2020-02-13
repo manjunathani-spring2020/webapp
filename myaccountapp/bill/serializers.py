@@ -18,6 +18,12 @@ class BillGetFileSerializer(serializers.ModelSerializer):
         model = File
         fields = ['file_name', 'uuid_file_id', 'url', 'upload_date']
 
+    def to_representation(self, instance):
+        representation = super(BillGetFileSerializer, self).to_representation(instance)
+        full_path = instance.url
+        representation['url'] = full_path.name
+        return representation
+
 
 class BillGetSerializer(serializers.ModelSerializer):
     attachment = BillGetFileSerializer()
