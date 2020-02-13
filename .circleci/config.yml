@@ -19,6 +19,7 @@ jobs:
             sudo pip install mysqlclient
             sudo pip install django_mysql
             sudo pip install bcrypt==3.1.7
+            sudo pip install django-file-md5
       - run:
       # Our primary container isn't MYSQL so run a sleep command until it's ready.
           name: Waiting for MySQL to be ready
@@ -62,6 +63,7 @@ jobs:
             sudo pip install mysqlclient
             sudo pip install django_mysql
             sudo pip install bcrypt==3.1.7
+            sudo pip install django-file-md5
       - run:
           # Our primary container isn't MYSQL so run a sleep command until it's ready.
           name: Waiting for MySQL to be ready

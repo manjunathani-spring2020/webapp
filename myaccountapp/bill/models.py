@@ -27,6 +27,7 @@ class Bill(models.Model):
     ]
 
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATS, verbose_name="paymentStatus")
+    attachment = models.ForeignKey(settings.AUTH_FILE_MODEL, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.vendor
