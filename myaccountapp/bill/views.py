@@ -69,7 +69,10 @@ def api_get_put_delete_bill_view(request, uuid_bill_id):
 
     try:
         bill = Bill.objects.get(uuid_bill_id=uuid_bill_id)
-        file = File.objects.get(uuid_file_id=bill.attachment)
+
+        if bill.attachment is not None:
+            file = File.objects.get(uuid_file_id=bill.attachment.uuid_file_id)
+
     except Bill.DoesNotExist:
         return Response({'response': "Bill doesn't exist."},
                         status=status.HTTP_404_NOT_FOUND)
@@ -106,10 +109,16 @@ def api_get_put_delete_bill_view(request, uuid_bill_id):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
-        file_path = 'bill/{file_id}-{filename}'.format(
-            file_id=str(file.uuid_file_id), filename=file.file_name
-        )
-        os.remove(os.path.join(settings.MEDIA_ROOT, file_path))
+
+        if bill.attachment is not None:
+            if 'S3_BUCKET_NAME' in os.environ:
+                bill.attachment.url.delete(save=False)
+            else:
+                file_path = 'bill/{file_id}-{filename}'.format(
+                    file_id=str(file.uuid_file_id), filename=file.file_name
+                )
+                os.remove(os.path.join(settings.MEDIA_ROOT, file_path))
+
         operation = bill.delete()
         data = {}
         if operation:

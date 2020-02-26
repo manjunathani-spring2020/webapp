@@ -43,7 +43,6 @@ def api_upload_file_view(request, uuid_bill_id):
     if request.method == 'POST':
         serializer = FilePostSerializer(data=request.data)
         data = {}
-
         if serializer.is_valid():
             file = serializer.save()
             file.file_name = request_file_name
@@ -82,10 +81,15 @@ def api_get_delete_file_view(request, uuid_bill_id, uuid_file_id):
         return Response(serializer.data)
 
     elif request.method == 'DELETE':
-        file_path = 'bill/{file_id}-{filename}'.format(
-            file_id=str(file.uuid_file_id), filename=file.file_name
-        )
-        os.remove(os.path.join(settings.MEDIA_ROOT, file_path))
+
+        if 'S3_BUCKET_NAME' in os.environ:
+            file.url.delete(save=False)
+        else:
+            file_path = 'bill/{file_id}-{filename}'.format(
+                file_id=str(file.uuid_file_id), filename=file.file_name
+            )
+            os.remove(os.path.join(settings.MEDIA_ROOT, file_path))
+
         operation = file.delete()
         data = {}
         if operation:
