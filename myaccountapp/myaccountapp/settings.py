@@ -102,10 +102,11 @@ WSGI_APPLICATION = 'myaccountapp.wsgi.application'
 if 'DB_HOST' in os.environ:
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     AWS_STORAGE_BUCKET_NAME = os.environ['S3_BUCKET_NAME']
+    AWS_DEFAULT_ACL = 'private'
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'acc_data',
+            'NAME': os.environ['DB_NAME'],
             'USER': os.environ['DB_USERNAME'],
             'PASSWORD': os.environ['DB_PASSWORD'],
             'HOST': os.environ['DB_HOST'],
