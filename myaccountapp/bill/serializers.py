@@ -1,3 +1,4 @@
+import os
 from rest_framework import serializers
 from bill.models import Bill
 from file.models import File
@@ -21,7 +22,10 @@ class BillGetFileSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super(BillGetFileSerializer, self).to_representation(instance)
         full_path = instance.url
-        representation['url'] = full_path.name
+        if 'S3_BUCKET_NAME' in os.environ:
+            representation['url'] = full_path.url.split('?')[0]
+        else:
+            representation['url'] = full_path.name
         return representation
 
 
