@@ -64,6 +64,8 @@ jobs:
             sudo pip install django_mysql
             sudo pip install bcrypt==3.1.7
             sudo pip install django-file-md5
+            sudo pip install boto3
+            sudo pip install django-storages
       - run:
           # Our primary container isn't MYSQL so run a sleep command until it's ready.
           name: Waiting for MySQL to be ready

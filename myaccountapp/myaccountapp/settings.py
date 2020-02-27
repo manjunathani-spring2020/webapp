@@ -13,9 +13,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = "/media/"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.relpath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
@@ -26,23 +24,38 @@ SECRET_KEY = '1uebsj7m*!n=x$3lcyu#)-ewcg96i-&fxe8j6+r3_dhq$x^0s)'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
-
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'account',
-    'bill',
-    'file',
-    'rest_framework',
-    'rest_framework.authtoken',
-]
+if 'DB_HOST' in os.environ:
+    INSTALLED_APPS = [
+        'django.contrib.admin',
+        'django.contrib.auth',
+        'django.contrib.contenttypes',
+        'django.contrib.sessions',
+        'django.contrib.messages',
+        'django.contrib.staticfiles',
+        'account',
+        'bill',
+        'file',
+        'rest_framework',
+        'rest_framework.authtoken',
+        'storages',
+    ]
+else:
+    INSTALLED_APPS = [
+        'django.contrib.admin',
+        'django.contrib.auth',
+        'django.contrib.contenttypes',
+        'django.contrib.sessions',
+        'django.contrib.messages',
+        'django.contrib.staticfiles',
+        'account',
+        'bill',
+        'file',
+        'rest_framework',
+        'rest_framework.authtoken',
+    ]
 
 AUTH_USER_MODEL = 'account.Account'
 AUTH_FILE_MODEL = 'file.File'
@@ -86,16 +99,32 @@ WSGI_APPLICATION = 'myaccountapp.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'acc_data',
-        'USER': 'root',
-        'PASSWORD': 'Comp23329002@',
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
+if 'DB_HOST' in os.environ:
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    AWS_STORAGE_BUCKET_NAME = os.environ['S3_BUCKET_NAME']
+    AWS_DEFAULT_ACL = 'private'
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': os.environ['DB_NAME'],
+            'USER': os.environ['DB_USERNAME'],
+            'PASSWORD': os.environ['DB_PASSWORD'],
+            'HOST': os.environ['DB_HOST'],
+        }
     }
-}
+else:
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    MEDIA_URL = "/media/"
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'acc_data',
+            'USER': 'root',
+            'PASSWORD': 'Comp23329002@',
+            'HOST': '127.0.0.1',
+            'PORT': '3306',
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators

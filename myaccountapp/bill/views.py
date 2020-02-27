@@ -1,13 +1,17 @@
+import os
+
 from rest_framework import status
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
 
+from django.conf import settings
+
 from bill.models import Bill
 from bill.serializers import BillSerializer, BillGetSerializer
 from account.models import Account
-import pdb
+from file.models import File
 
 
 @api_view(['POST'])
@@ -65,6 +69,10 @@ def api_get_put_delete_bill_view(request, uuid_bill_id):
 
     try:
         bill = Bill.objects.get(uuid_bill_id=uuid_bill_id)
+
+        if bill.attachment is not None:
+            file = File.objects.get(uuid_file_id=bill.attachment.uuid_file_id)
+
     except Bill.DoesNotExist:
         return Response({'response': "Bill doesn't exist."},
                         status=status.HTTP_404_NOT_FOUND)
@@ -101,6 +109,16 @@ def api_get_put_delete_bill_view(request, uuid_bill_id):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
+
+        if bill.attachment is not None:
+            if 'S3_BUCKET_NAME' in os.environ:
+                bill.attachment.url.delete(save=False)
+            else:
+                file_path = 'bill/{file_id}-{filename}'.format(
+                    file_id=str(file.uuid_file_id), filename=file.file_name
+                )
+                os.remove(os.path.join(settings.MEDIA_ROOT, file_path))
+
         operation = bill.delete()
         data = {}
         if operation:
