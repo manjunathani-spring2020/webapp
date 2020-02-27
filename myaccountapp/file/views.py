@@ -55,7 +55,11 @@ def api_upload_file_view(request, uuid_bill_id):
             data['response'] = 'successfully added a new file.'
             data['file_name'] = file.file_name
             data['id'] = file.uuid_file_id
-            data['url'] = str(file.url.url.split('?')[0])
+
+            if 'S3_BUCKET_NAME' in os.environ:
+                data['url'] = str(file.url.url.split('?')[0])
+            else:
+                data['url'] = str(file.url)
             data['upload_date'] = file.upload_date
             return Response(data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
