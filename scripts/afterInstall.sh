@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 cd /home/ubuntu/
-ls -al
-cat .bashrc
+source .bashrc
 cd /home/ubuntu/myaccountapp/
 python3 manage.py makemigrations
 python3 manage.py migrate
