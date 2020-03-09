@@ -2,6 +2,6 @@
 cd /home/ubuntu/
 ls -al
 cat .bashrc
-#cd /home/ubuntu/myaccountapp/
-#python3 manage.py makemigrations
-#python3 manage.py migrate
+cd /home/ubuntu/myaccountapp/
+python3 manage.py makemigrations
+python3 manage.py migrate
