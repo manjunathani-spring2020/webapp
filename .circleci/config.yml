@@ -34,6 +34,7 @@ jobs:
       - run:
           name: Running MySQL
           command: |
+            sudo apt-get update
             sudo apt-get install default-mysql-client
       - run:
           name: Running tests
@@ -48,7 +49,7 @@ jobs:
             mkdir -p codedeploy_artifact
             pwd
             ls -al
-            zip -r csye6225-web-app-${CIRCLE_BUILD_NUM}.zip myaccountapp *.yml
+            zip -r csye6225-web-app-${CIRCLE_BUILD_NUM}.zip myaccountapp scripts *.yml
             mv csye6225-web-app-${CIRCLE_BUILD_NUM}.zip codedeploy_artifact/
             cd codedeploy_artifact
             ls -al
@@ -109,6 +110,7 @@ jobs:
       - run:
           name: Running MySQL
           command: |
+            sudo apt-get update
             sudo apt-get install default-mysql-client
       - run:
           name: Running tests
