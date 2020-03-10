@@ -2,7 +2,11 @@ version: 0.0
 os: linux
 files:
   - source: /
-    destination: /home/ubuntu
+    destination: /srv/app
+permissions:
+  - object: /srv/app
+    owner: ubuntu
+    group: ubuntu
 
 hooks:
   AfterInstall:

@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
-cd /home/ubuntu/myaccountapp/
+cd /srv/app/myaccountapp/
 python3 manage.py runserver 0.0.0.0:8000
