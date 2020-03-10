@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
-python3 ../myaccountapp/manage.py makemigrations
-python3 ../myaccountapp/manage.py migrate
+cd ..
+python3 manage.py makemigrations
+python3 manage.py migrate
