@@ -1,7 +1,7 @@
 # Account and Bill management App
 
 ## Overview
-**myaccountapp** is a Django project containing various apis for user accounts and bills
+**myaccountapp** is a Django project containing various apis for user accounts and bills.
 
 ## Requirements to run the application:
 * Django 2.0+

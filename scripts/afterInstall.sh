@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
-cd /srv/app/myaccountapp/
+cd /home/ubuntu/myaccountapp/
 python3 manage.py makemigrations
 python3 manage.py migrate
