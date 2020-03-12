@@ -72,7 +72,7 @@ jobs:
           command: |
             aws configure list
             aws configure set region us-east-1
-            aws deploy create-deployment --application-name ${APPLICATION_NAME} --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name ${DEPLOYMENT_GROUP_NAME} --s3-location bucket=${CODEDEPLOY_S3_BUCKET},bundleType=zip,key=csye6225-web-app-${CIRCLE_BUILD_NUM}.zip
+            aws deploy create-deployment --application-name ${APPLICATION_NAME} --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name ${DEPLOYMENT_GROUP_NAME} --s3-location bucket=${CODEDEPLOY_S3},bundleType=zip,key=csye6225-web-app-${CIRCLE_BUILD_NUM}.zip
 
   build:
     filters:
