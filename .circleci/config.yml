@@ -20,6 +20,9 @@ jobs:
             sudo pip install django_mysql
             sudo pip install bcrypt==3.1.7
             sudo pip install django-file-md5
+            sudo pip install boto3
+            sudo pip install django-storages
+            sudo pip install pymysql
       - run:
       # Our primary container isn't MYSQL so run a sleep command until it's ready.
           name: Waiting for MySQL to be ready
@@ -34,6 +37,7 @@ jobs:
       - run:
           name: Running MySQL
           command: |
+            sudo apt-get update
             sudo apt-get install default-mysql-client
       - run:
           name: Running tests
@@ -66,26 +70,39 @@ jobs:
             sudo pip install django-file-md5
             sudo pip install boto3
             sudo pip install django-storages
+            sudo pip install pymysql
       - run:
-          # Our primary container isn't MYSQL so run a sleep command until it's ready.
-          name: Waiting for MySQL to be ready
+          name: Zip Artifact
           command: |
-            for i in `seq 1 10`;
-            do
-              nc -z 127.0.0.1 3306 && echo Success && exit 0
-              echo -n .
-              sleep 1
-            done
-            echo Failed waiting for MySQL && exit 1
+            echo "Hello the current build number is ${CIRCLE_BUILD_NUM}"
+            pwd
+            mkdir -p codedeploy_artifact
+            pwd
+            ls -al
+            cd scripts
+            chmod +x *.sh
+            cd ..
+            zip -r csye6225-web-app-${CIRCLE_BUILD_NUM}.zip myaccountapp scripts *.yml requirements.txt
+            mv csye6225-web-app-${CIRCLE_BUILD_NUM}.zip codedeploy_artifact/
+            cd codedeploy_artifact
+            ls -al
+            pwd
+            cd ..
+            pwd
+            ls -al
       - run:
-          name: Running MySQL
+          name: upload Artifact to S3
           command: |
-            sudo apt-get install default-mysql-client
+            sudo pip install awscli
+            cd codedeploy_artifact
+            aws s3 cp csye6225-web-app-${CIRCLE_BUILD_NUM}.zip s3://${CODEDEPLOY_S3}
+
       - run:
-          name: Running tests
+          name: Call codeploy to deploy application
           command: |
-            cd myaccountapp
-            python3 manage.py test
+            aws configure list
+            aws configure set region us-east-1
+            aws deploy create-deployment --application-name ${APPLICATION_NAME} --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name ${DEPLOYMENT_GROUP_NAME} --s3-location bucket=${CODEDEPLOY_S3},bundleType=zip,key=csye6225-web-app-${CIRCLE_BUILD_NUM}.zip
 
 workflows:
   version: 2

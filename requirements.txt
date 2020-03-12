@@ -1,0 +1,11 @@
+django
+djangorestframework
+mysqlclient
+django_mysql
+bcrypt==3.1.7
+django-file-md5
+boto3
+django-storages
+mysqlclient
+django_mysql
+pymysql
