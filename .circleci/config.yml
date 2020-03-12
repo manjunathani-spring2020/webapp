@@ -65,7 +65,7 @@ jobs:
           command: |
             sudo pip install awscli
             cd codedeploy_artifact
-            aws s3 cp csye6225-web-app-${CIRCLE_BUILD_NUM}.zip ${CODEDEPLOY_S3_BUCKET}
+            aws s3 cp csye6225-web-app-${CIRCLE_BUILD_NUM}.zip ${CODEDEPLOY_S3}
 
       - run:
           name: Call codeploy to deploy application
