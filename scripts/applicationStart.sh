@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-cd /home/ubuntu/myaccountapp/
-source env/bin/activate
-nohup python3 manage.py runserver 0.0.0.0:8000 &
-echo -e "\n"
+#!/usr/bin/bash
+cd myaccountapp/
+nohup python -u manage.py runserver 0.0.0.0:8000 </dev/null >/dev/null 2>&1 &

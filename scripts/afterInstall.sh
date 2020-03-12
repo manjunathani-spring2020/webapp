@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
-cd /home/ubuntu/myaccountapp/
-python3 -m venv env
-source env/bin/activate
-cd /home/ubuntu/
-pip3 install -r requirements.txt
-cd /home/ubuntu/myaccountapp/
-python3 manage.py makemigrations
-python3 manage.py migrate
+#!/usr/bin/bash
+#cd myaccountapp/
+#python -m venv env
+#source env/bin/activate
+#cd ..
+#pip install -r requirements.txt
+cd myaccountapp/
+python manage.py makemigrations
+python manage.py migrate
