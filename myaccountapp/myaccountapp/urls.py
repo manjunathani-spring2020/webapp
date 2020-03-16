@@ -11,7 +11,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('v1/user/', registration_view, name="register"),
     path('v1/user/self', api_detail_get_put_view, name="get and put"),
-    path('v1/bill/', api_create_bill_view, name="bill post"),
+    path('v2/bill/', api_create_bill_view, name="bill post"),
     path('v1/bills', api_get_all_bills_view, name="bill get all"),
     path('v1/bill/<uuid:uuid_bill_id>', api_get_put_delete_bill_view, name="bill get put delete"),
     path('v1/bill/<uuid:uuid_bill_id>/file', api_upload_file_view, name="file upload"),
