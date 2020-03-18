@@ -1,11 +1,11 @@
 import logging
+from django_statsd.clients import statsd
 
 from rest_framework import status
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
-# from django_statsd.clients import statsd
 
 from account.models import Account
 from account.serializers import RegistrationSerializer, UserSerializer, UserSerializer2
@@ -16,6 +16,7 @@ logger.setLevel("INFO")
 @api_view(['POST'])
 def registration_view(request):
     if request.method == 'POST':
+        statsd.incr('api.registerUser')
         serializer = RegistrationSerializer(data=request.data)
         data = {}
         if serializer.is_valid():
@@ -44,10 +45,12 @@ def api_detail_get_put_view(request):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
+        statsd.incr('api.getUser')
         serializer = UserSerializer(account)
         logger.info("GET: User with uuid: %s", account.uuid_id)
         return Response(serializer.data)
     elif request.method == 'PUT':
+        statsd.incr('api.updateUser')
         serializer = UserSerializer2(account, data=request.data)
         data = {}
         if serializer.is_valid():
