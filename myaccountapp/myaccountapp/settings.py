@@ -27,6 +27,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+STATSD_HOST = '127.0.0.1'
+STATSD_PORT = 8125
+STATSD_PREFIX = 'statsd'
+STATSD_MAXUDPSIZE = 512
+
 # Application definition
 if 'DB_HOST' in os.environ:
     INSTALLED_APPS = [
@@ -42,6 +47,7 @@ if 'DB_HOST' in os.environ:
         'rest_framework',
         'rest_framework.authtoken',
         'storages',
+        'django_statsd',
     ]
 else:
     INSTALLED_APPS = [
@@ -56,6 +62,7 @@ else:
         'file',
         'rest_framework',
         'rest_framework.authtoken',
+        'django_statsd',
     ]
 
 AUTH_USER_MODEL = 'account.Account'
@@ -66,7 +73,14 @@ PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
 ]
 
+STATSD_PATCHES = [
+        'django_statsd.patches.db',
+        'django_statsd.patches.cache',
+]
+
 MIDDLEWARE = [
+    'django_statsd.middleware.GraphiteRequestTimingMiddleware',
+    'django_statsd.middleware.GraphiteMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

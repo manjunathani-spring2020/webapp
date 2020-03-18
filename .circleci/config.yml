@@ -23,6 +23,8 @@ jobs:
             sudo pip install boto3
             sudo pip install django-storages
             sudo pip install pymysql
+            sudo pip install django-statsd==2.5.0
+            sudo pip install django-statsd-mozilla
       - run:
       # Our primary container isn't MYSQL so run a sleep command until it's ready.
           name: Waiting for MySQL to be ready
@@ -71,6 +73,8 @@ jobs:
             sudo pip install boto3
             sudo pip install django-storages
             sudo pip install pymysql
+            sudo pip install django-statsd==2.5.0
+            sudo pip install django-statsd-mozilla
       - run:
           name: Zip Artifact
           command: |
