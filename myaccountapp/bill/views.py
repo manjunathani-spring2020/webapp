@@ -27,7 +27,7 @@ def api_create_bill_view(request):
     account_user = Account.objects.get(email=request.user)
 
     if request.method == 'POST':
-        django_statsd.increment('api.createBill')
+        django_statsd.incr('api.createBill')
         django_statsd.start('api.createBill.time.taken')
         serializer = BillSerializer(bill_post, data=request.data)
         data = {}
@@ -74,7 +74,7 @@ def api_get_all_bills_view(request):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        django_statsd.increment('api.getAllBills')
+        django_statsd.incr('api.getAllBills')
         django_statsd.start('api.getAllBills.time.taken')
         serializer = BillGetSerializer(bill, many=True)
         logger.info("GET: All Bills for User with uuid: %s", account_user.uuid_id)
@@ -107,14 +107,14 @@ def api_get_put_delete_bill_view(request, uuid_bill_id):
                         status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        django_statsd.increment('api.getBill')
+        django_statsd.incr('api.getBill')
         django_statsd.start('api.getBill.time.taken')
         serializer = BillGetSerializer(bill)
         django_statsd.stop('api.getBill.time.taken')
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        django_statsd.increment('api.putBill')
+        django_statsd.incr('api.putBill')
         django_statsd.start('api.putBill.time.taken')
         serializer = BillSerializer(bill, data=request.data)
         data = {}
@@ -146,7 +146,7 @@ def api_get_put_delete_bill_view(request, uuid_bill_id):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
-        django_statsd.increment('api.deleteBill')
+        django_statsd.incr('api.deleteBill')
         django_statsd.start('api.deleteBill.time.taken')
 
         if bill.attachment is not None:

@@ -18,7 +18,7 @@ logger.setLevel("INFO")
 def registration_view(request):
     if request.method == 'POST':
 
-        django_statsd.increment('api.registerUser')
+        django_statsd.incr('api.registerUser')
         django_statsd.start('api.registerUser.time.taken')
         serializer = RegistrationSerializer(data=request.data)
         data = {}
@@ -56,7 +56,7 @@ def api_detail_get_put_view(request):
 
     if request.method == 'GET':
 
-        django_statsd.increment('api.getUser')
+        django_statsd.incr('api.getUser')
         django_statsd.start('api.getUser.time.taken')
         serializer = UserSerializer(account)
         logger.info("GET: User with uuid: %s", account.uuid_id)
@@ -65,7 +65,7 @@ def api_detail_get_put_view(request):
 
     elif request.method == 'PUT':
 
-        django_statsd.increment('api.putUser')
+        django_statsd.incr('api.putUser')
         django_statsd.start('api.putUser.time.taken')
         serializer = UserSerializer2(account, data=request.data)
 

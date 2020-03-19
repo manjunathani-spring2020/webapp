@@ -50,7 +50,7 @@ def api_upload_file_view(request, uuid_bill_id):
                         status=status.HTTP_400_BAD_REQUEST)
 
     if request.method == 'POST':
-        django_statsd.increment('api.createFile')
+        django_statsd.incr('api.createFile')
         django_statsd.start('api.createFile.time.taken')
         serializer = FilePostSerializer(data=request.data)
         data = {}
@@ -103,7 +103,7 @@ def api_get_delete_file_view(request, uuid_bill_id, uuid_file_id):
                         status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        django_statsd.increment('api.getFile')
+        django_statsd.incr('api.getFile')
         django_statsd.start('api.getFile.time.taken')
         serializer = FileGetSerializer(file)
         logger.info("GET: Uploaded File")
@@ -111,7 +111,7 @@ def api_get_delete_file_view(request, uuid_bill_id, uuid_file_id):
         return Response(serializer.data)
 
     elif request.method == 'DELETE':
-        django_statsd.increment('api.deleteFile')
+        django_statsd.incr('api.deleteFile')
         django_statsd.start('api.deleteFile.time.taken')
 
         if 'S3_BUCKET_NAME' in os.environ:
