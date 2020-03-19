@@ -51,7 +51,7 @@ def api_create_bill_view(request):
             data['amount_due'] = bill.amount_due
             data['categories'] = bill.categories
             data['payment_status'] = bill.payment_status
-            logger.info("POST: Added Bill with uuid: %s", bill.uuid_id)
+            logger.info("POST: Added Bill")
             django_statsd.stop('api.createBill.time.taken')
             return Response(data, status=status.HTTP_201_CREATED)
 
@@ -137,7 +137,7 @@ def api_get_put_delete_bill_view(request, uuid_bill_id):
             data['amount_due'] = bill.amount_due
             data['categories'] = bill.categories
             data['payment_status'] = bill.payment_status
-            logger.info("PUT: Update Bill for User with uuid: %s", account_user.uuid_id)
+            logger.info("PUT: Update Bill for User")
             django_statsd.stop('api.putBill.time.taken')
             return Response(data=data, status=status.HTTP_200_OK)
 
