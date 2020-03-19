@@ -94,6 +94,7 @@ def api_get_delete_file_view(request, uuid_bill_id, uuid_file_id):
         django_statsd.stop('api.getFile.DB')
     except (Bill.DoesNotExist, File.DoesNotExist):
         logger.error("Bill or File doesn't exist")
+        django_statsd.stop('api.getFile.DB')
         return Response({'response': "Bill or File doesn't exist."},
                         status=status.HTTP_404_NOT_FOUND)
 
