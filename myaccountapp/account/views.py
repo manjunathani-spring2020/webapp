@@ -52,6 +52,7 @@ def api_detail_get_put_view(request):
         django_statsd.stop('api.getUser.DB')
     except Account.DoesNotExist:
         logger.error("User Doesn't Exist")
+        django_statsd.stop('api.getUser.DB')
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':

@@ -71,6 +71,7 @@ def api_get_all_bills_view(request):
         django_statsd.stop('api.getAllBills.DB')
     except Bill.DoesNotExist:
         logger.error("Bill Doesn't Exist")
+        django_statsd.stop('api.getAllBills.DB')
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
@@ -98,6 +99,7 @@ def api_get_put_delete_bill_view(request, uuid_bill_id):
 
     except Bill.DoesNotExist:
         logger.error("Bill Doesn't Exist")
+        django_statsd.stop('api.getBill.DB')
         return Response({'response': "Bill doesn't exist."},
                         status=status.HTTP_404_NOT_FOUND)
 
