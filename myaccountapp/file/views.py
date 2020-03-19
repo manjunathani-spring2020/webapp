@@ -126,7 +126,7 @@ def api_get_delete_file_view(request, uuid_bill_id, uuid_file_id):
 
         django_statsd.start('api.deleteFile.DB')
         operation = file.delete()
-        django_statsd.start('api.deleteFile.DB')
+        django_statsd.stop('api.deleteFile.DB')
 
         data = {}
         if operation:
