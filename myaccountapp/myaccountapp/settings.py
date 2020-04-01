@@ -14,6 +14,8 @@ import os
 import logging.config
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+import urllib
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.relpath(__file__)))
 
 # Quick-start development settings - unsuitable for production
@@ -203,3 +205,21 @@ if 'DB_HOST' in os.environ:
             }
         }
     })
+
+# AWS Credentials
+AWS_ACCESS_KEY_ID = "AKIAX2KTAKTZCL4APF4F"
+AWS_SECRET_ACCESS_KEY = "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"
+# Celery
+BROKER_URL = 'sqs://{0}:{1}@'.format(
+    urllib.parse.quote(AWS_ACCESS_KEY_ID, safe=''),
+    urllib.parse.quote(AWS_SECRET_ACCESS_KEY, safe='')
+)
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_DEFAULT_QUEUE = 'test'
+CELERY_RESULT_BACKEND = None # Disabling the results backend
+BROKER_TRANSPORT_OPTIONS = {
+    'region': 'us-east-1',
+    'polling_interval': 20,
+}

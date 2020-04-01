@@ -1,6 +1,9 @@
 import os
 import logging
 import django_statsd
+from celery import shared_task
+from datetime import datetime, timedelta, date
+import pdb
 
 from rest_framework import status
 from rest_framework.authentication import BasicAuthentication
@@ -81,6 +84,30 @@ def api_get_all_bills_view(request):
         logger.info("GET: All Bills for User with uuid: %s", account_user.uuid_id)
         django_statsd.stop('api.getAllBills.time.taken')
         return Response(serializer.data)
+
+
+@api_view(['GET', ])
+@authentication_classes([BasicAuthentication, ])
+@permission_classes((IsAuthenticated,))
+def api_get_due_bills_view(request, days):
+    try:
+        account_user = Account.objects.get(email=request.user)
+        due_date = date.today() + timedelta(days=days)
+        bill = Bill.objects.all().filter(owner_id=account_user.uuid_id).filter(due_date__range=(date.today(), due_date))
+    except Bill.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = BillGetSerializer(bill, many=True)
+        get_bill_due_sqs.delay(serializer.data)
+        type(serializer.data)
+        pdb.set_trace()
+        return Response(serializer.data)
+
+
+@shared_task
+def get_bill_due_sqs(data):
+    return data
 
 
 @api_view(['GET', 'PUT', 'DELETE', ])
