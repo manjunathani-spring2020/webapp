@@ -4,7 +4,7 @@ import json
 import boto3
 import django_statsd
 from celery import shared_task
-
+import threading
 
 from datetime import timedelta, date
 from rest_framework import status
@@ -22,50 +22,48 @@ from file.models import File
 logger = logging.getLogger(__name__)
 logger.setLevel("INFO")
 
-sqs = boto3.resource('sqs', region_name='us-east-1', aws_access_key_id='AKIAX2KTAKTZCL4APF4F',
-                     aws_secret_access_key='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')
-sqs_client = boto3.client('sqs', region_name='us-east-1', aws_access_key_id='AKIAX2KTAKTZCL4APF4F',
-                          aws_secret_access_key='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')
+if 'AWS_ACCOUNT_ID' in os.environ:
+    sqs = boto3.resource('sqs', region_name='us-east-1')
+    sqs_client = boto3.client('sqs', region_name='us-east-1')
 
-queue_url = 'https://sqs.us-east-1.amazonaws.com/537581868274/DueBillsQueue'
+    queue_url = 'https://sqs.us-east-1.amazonaws.com/' + os.environ['AWS_ACCOUNT_ID'] + '/' + os.environ[
+        'SQS_QUEUE_NAME']
 
-queue = sqs.get_queue_by_name(QueueName='DueBillsQueue')
+    queue = sqs.get_queue_by_name(QueueName=os.environ['SQS_QUEUE_NAME'])
 
-sqs_client.set_queue_attributes(
-    QueueUrl=queue_url,
-    Attributes={'ReceiveMessageWaitTimeSeconds': '20'}
-)
-
-
-def sns_publish_for_lambda():
-    response = sqs_client.receive_message(
+    sqs_client.set_queue_attributes(
         QueueUrl=queue_url,
-        AttributeNames=[
-            'SentTimestamp'
-        ],
-        MaxNumberOfMessages=1,
-        MessageAttributeNames=[
-            'All'
-        ],
-        VisibilityTimeout=0,
-        WaitTimeSeconds=0
-    )
-    message = response['Messages'][0]
-
-    sns = boto3.client('sns', region_name='us-east-1', aws_access_key_id='AKIAX2KTAKTZCL4APF4F',
-                       aws_secret_access_key='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')
-
-    sns.publish(
-        TopicArn='arn:aws:sns:us-east-1:537581868274:due_bills_topic',
-        MessageStructure='json',
-        Message=json.dumps({'default': json.dumps(message['MessageAttributes'])}),
+        Attributes={'ReceiveMessageWaitTimeSeconds': '20'}
     )
 
 
-import threading
-def my_inline_function():
-    download_thread = threading.Thread(target=sns_publish_for_lambda)
-    download_thread.start()
+    def sns_publish_for_lambda():
+        response = sqs_client.receive_message(
+            QueueUrl=queue_url,
+            AttributeNames=[
+                'SentTimestamp'
+            ],
+            MaxNumberOfMessages=1,
+            MessageAttributeNames=[
+                'All'
+            ],
+            VisibilityTimeout=0,
+            WaitTimeSeconds=0
+        )
+        message = response['Messages'][0]
+
+        sns = boto3.client('sns', region_name='us-east-1')
+
+        sns.publish(
+            TopicArn='arn:aws:sns:us-east-1:' + os.environ['AWS_ACCOUNT_ID'] + ':' + os.environ['SNS_TOPIC_NAME'],
+            MessageStructure='json',
+            Message=json.dumps({'default': json.dumps(message['MessageAttributes'])}),
+        )
+
+    def my_inline_function():
+        # do some stuff
+        download_thread = threading.Thread(target=sns_publish_for_lambda)
+        download_thread.start()
 
 
 @api_view(['POST'])
