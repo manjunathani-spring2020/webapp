@@ -1,7 +1,7 @@
 import os
 import logging
 import json
-
+import pdb
 import boto3
 import django_statsd
 from celery import shared_task
@@ -228,11 +228,12 @@ def api_get_due_bills_view(request, days):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     bill_uuids = []
-    for bill in bill:
-        bill_uuids.append(bill.uuid_bill_id)
+    for sqs_bill in bill:
+        bill_uuids.append(sqs_bill.uuid_bill_id)
 
     if request.method == 'GET':
         serializer = BillGetSerializer(bill, many=True)
+        pdb.set_trace()
         queue.send_message(MessageBody='boto3', MessageAttributes={
             'Email': {
                 'StringValue': '{email}'.format(email=request.user),
