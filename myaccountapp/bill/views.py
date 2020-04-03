@@ -228,7 +228,7 @@ def api_get_due_bills_view(request, days):
 
     bill_uuids = []
     for sqs_bill in bill:
-        bill_uuids.append(sqs_bill.uuid_bill_id)
+        bill_uuids.append(str(sqs_bill.uuid_bill_id))
 
     if request.method == 'GET':
         serializer = BillGetSerializer(bill, many=True)
