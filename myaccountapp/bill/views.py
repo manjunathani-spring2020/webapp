@@ -1,7 +1,6 @@
 import os
 import logging
 import json
-import pdb
 import boto3
 import django_statsd
 from celery import shared_task
@@ -233,7 +232,6 @@ def api_get_due_bills_view(request, days):
 
     if request.method == 'GET':
         serializer = BillGetSerializer(bill, many=True)
-        pdb.set_trace()
         queue.send_message(MessageBody='boto3', MessageAttributes={
             'Email': {
                 'StringValue': '{email}'.format(email=request.user),
