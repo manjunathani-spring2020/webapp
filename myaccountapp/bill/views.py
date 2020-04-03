@@ -4,7 +4,6 @@ import json
 import boto3
 import django_statsd
 from celery import shared_task
-import pdb
 
 from datetime import timedelta, date
 from rest_framework import status
@@ -230,7 +229,6 @@ def api_get_due_bills_view(request, days):
     bill_uuids = []
     for sqs_bill in bill:
         bill_uuids.append(str(sqs_bill.uuid_bill_id))
-    pdb.set_trace()
 
     if request.method == 'GET':
         serializer = BillGetSerializer(bill, many=True)
