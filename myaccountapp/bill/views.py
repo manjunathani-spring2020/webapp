@@ -3,7 +3,6 @@ import logging
 import json
 import boto3
 import django_statsd
-from celery import shared_task
 import threading
 
 from datetime import timedelta, date
@@ -60,10 +59,9 @@ if 'AWS_ACCOUNT_ID' in os.environ:
             Message=json.dumps({'default': json.dumps(message['MessageAttributes'])}),
         )
 
-    def my_inline_function():
-        # do some stuff
-        download_thread = threading.Thread(target=sns_publish_for_lambda)
-        download_thread.start()
+    def thread_lambda_function():
+        thread = threading.Thread(target=sns_publish_for_lambda)
+        thread.start()
 
 
 @api_view(['POST'])
@@ -247,5 +245,5 @@ def api_get_due_bills_view(request, days):
                 'DataType': 'String'
             }
         })
-        my_inline_function()
+        thread_lambda_function()
         return Response(serializer.data)
