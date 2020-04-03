@@ -3,7 +3,7 @@ import logging
 import json
 import boto3
 import django_statsd
-from celery import shared_task
+import threading
 
 from datetime import timedelta, date
 from rest_framework import status
@@ -36,7 +36,6 @@ if 'AWS_ACCOUNT_ID' in os.environ:
     )
 
 
-    @shared_task
     def sns_publish_for_lambda():
         response = sqs_client.receive_message(
             QueueUrl=queue_url,
@@ -59,6 +58,10 @@ if 'AWS_ACCOUNT_ID' in os.environ:
             MessageStructure='json',
             Message=json.dumps({'default': json.dumps(message['MessageAttributes'])}),
         )
+
+    def thread_lambda_function():
+        thread = threading.Thread(target=sns_publish_for_lambda)
+        thread.start()
 
 
 @api_view(['POST'])
@@ -242,5 +245,5 @@ def api_get_due_bills_view(request, days):
                 'DataType': 'String'
             }
         })
-        sns_publish_for_lambda.delay()
+        thread_lambda_function()
         return Response(serializer.data)
