@@ -4,13 +4,8 @@ from celery import Celery
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myaccountapp.settings')
 app = Celery('myaccountapp')
-app.config_from_object('django.conf:settings')
+app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
-# app.conf.beat_schedule = {
-#     'display_time-30-seconds': {
-#         'task': 'bill.views.api_get_due_bills_view',
-#     },
-# }
 
 
 @app.task(bind=True)

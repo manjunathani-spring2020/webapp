@@ -206,20 +206,8 @@ if 'DB_HOST' in os.environ:
         }
     })
 
-# AWS Credentials
-AWS_ACCESS_KEY_ID = "AKIAX2KTAKTZCL4APF4F"
-AWS_SECRET_ACCESS_KEY = "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"
-# Celery
-BROKER_URL = 'sqs://{0}:{1}@'.format(
-    urllib.parse.quote(AWS_ACCESS_KEY_ID, safe=''),
-    urllib.parse.quote(AWS_SECRET_ACCESS_KEY, safe='')
-)
-CELERY_ACCEPT_CONTENT = ['application/json']
-CELERY_RESULT_SERIALIZER = 'json'
+
+CELERY_BROKER_URL = 'amqp://guest:guest@localhost'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_RESULT_BACKEND = 'db+sqlite:///results.sqlite'
 CELERY_TASK_SERIALIZER = 'json'
-CELERY_DEFAULT_QUEUE = 'test'
-CELERY_RESULT_BACKEND = None # Disabling the results backend
-BROKER_TRANSPORT_OPTIONS = {
-    'region': 'us-east-1',
-    'polling_interval': 20,
-}

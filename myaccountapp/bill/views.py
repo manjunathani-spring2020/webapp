@@ -1,10 +1,12 @@
 import os
 import logging
+import json
+
+import boto3
 import django_statsd
 from celery import shared_task
-from datetime import datetime, timedelta, date
-import pdb
 
+from datetime import timedelta, date
 from rest_framework import status
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.response import Response
@@ -12,7 +14,6 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.permissions import IsAuthenticated
 
 from django.conf import settings
-
 from bill.models import Bill
 from bill.serializers import BillSerializer, BillGetSerializer
 from account.models import Account
@@ -20,6 +21,43 @@ from file.models import File
 
 logger = logging.getLogger(__name__)
 logger.setLevel("INFO")
+
+sqs = boto3.resource('sqs', region_name='us-east-1')
+sqs_client = boto3.client('sqs', region_name='us-east-1')
+
+queue_url = 'https://sqs.us-east-1.amazonaws.com/' + os.environ['AWS_ACCOUNT_ID'] + '/' + os.environ['SQS_QUEUE_NAME']
+
+queue = sqs.get_queue_by_name(QueueName=os.environ['SQS_QUEUE_NAME'])
+
+sqs_client.set_queue_attributes(
+    QueueUrl=queue_url,
+    Attributes={'ReceiveMessageWaitTimeSeconds': '20'}
+)
+
+
+@shared_task
+def sns_publish_for_lambda():
+    response = sqs_client.receive_message(
+        QueueUrl=queue_url,
+        AttributeNames=[
+            'SentTimestamp'
+        ],
+        MaxNumberOfMessages=1,
+        MessageAttributeNames=[
+            'All'
+        ],
+        VisibilityTimeout=0,
+        WaitTimeSeconds=0
+    )
+    message = response['Messages'][0]
+
+    sns = boto3.client('sns', region_name='us-east-1')
+
+    sns.publish(
+        TopicArn='arn:aws:sns:us-east-1:' + os.environ['AWS_ACCOUNT_ID'] + ':' + os.environ['SNS_TOPIC_NAME'],
+        MessageStructure='json',
+        Message=json.dumps({'default': json.dumps(message['MessageAttributes'])}),
+    )
 
 
 @api_view(['POST'])
@@ -97,17 +135,24 @@ def api_get_due_bills_view(request, days):
     except Bill.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
+    bill_uuids = []
+    for bill in bill:
+        bill_uuids.append(bill.uuid_bill_id)
+
     if request.method == 'GET':
         serializer = BillGetSerializer(bill, many=True)
-        get_bill_due_sqs.delay(serializer.data)
-        type(serializer.data)
-        pdb.set_trace()
+        queue.send_message(MessageBody='boto3', MessageAttributes={
+            'Email': {
+                'StringValue': '{email}'.format(email=request.user),
+                'DataType': 'String'
+            },
+            'Bills': {
+                'StringValue': '{uuid}'.format(uuid=bill_uuids),
+                'DataType': 'String'
+            }
+        })
+        sns_publish_for_lambda.delay()
         return Response(serializer.data)
-
-
-@shared_task
-def get_bill_due_sqs(data):
-    return data
 
 
 @api_view(['GET', 'PUT', 'DELETE', ])
