@@ -1,7 +1,12 @@
 import os
 import logging
-import django_statsd
+import json
 
+import boto3
+import django_statsd
+from celery import shared_task
+
+from datetime import timedelta, date
 from rest_framework import status
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.response import Response
@@ -9,7 +14,6 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.permissions import IsAuthenticated
 
 from django.conf import settings
-
 from bill.models import Bill
 from bill.serializers import BillSerializer, BillGetSerializer
 from account.models import Account
@@ -17,6 +21,45 @@ from file.models import File
 
 logger = logging.getLogger(__name__)
 logger.setLevel("INFO")
+
+if 'AWS_ACCOUNT_ID' in os.environ:
+    sqs = boto3.resource('sqs', region_name='us-east-1')
+    sqs_client = boto3.client('sqs', region_name='us-east-1')
+
+    queue_url = 'https://sqs.us-east-1.amazonaws.com/' + os.environ['AWS_ACCOUNT_ID'] + '/' + os.environ[
+        'SQS_QUEUE_NAME']
+
+    queue = sqs.get_queue_by_name(QueueName=os.environ['SQS_QUEUE_NAME'])
+
+    sqs_client.set_queue_attributes(
+        QueueUrl=queue_url,
+        Attributes={'ReceiveMessageWaitTimeSeconds': '20'}
+    )
+
+
+    @shared_task
+    def sns_publish_for_lambda():
+        response = sqs_client.receive_message(
+            QueueUrl=queue_url,
+            AttributeNames=[
+                'SentTimestamp'
+            ],
+            MaxNumberOfMessages=1,
+            MessageAttributeNames=[
+                'All'
+            ],
+            VisibilityTimeout=0,
+            WaitTimeSeconds=0
+        )
+        message = response['Messages'][0]
+
+        sns = boto3.client('sns', region_name='us-east-1')
+
+        sns.publish(
+            TopicArn='arn:aws:sns:us-east-1:' + os.environ['AWS_ACCOUNT_ID'] + ':' + os.environ['SNS_TOPIC_NAME'],
+            MessageStructure='json',
+            Message=json.dumps({'default': json.dumps(message['MessageAttributes'])}),
+        )
 
 
 @api_view(['POST'])
@@ -171,3 +214,34 @@ def api_get_put_delete_bill_view(request, uuid_bill_id):
             logger.info("DELETE: Bill deleted")
             django_statsd.stop('api.deleteBill.time.taken')
             return Response(data=data, status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET', ])
+@authentication_classes([BasicAuthentication, ])
+@permission_classes((IsAuthenticated,))
+def api_get_due_bills_view(request, days):
+    try:
+        account_user = Account.objects.get(email=request.user)
+        due_date = date.today() + timedelta(days=days)
+        bill = Bill.objects.all().filter(owner_id=account_user.uuid_id).filter(due_date__range=(date.today(), due_date))
+    except Bill.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    bill_uuids = []
+    for bill in bill:
+        bill_uuids.append(bill.uuid_bill_id)
+
+    if request.method == 'GET':
+        serializer = BillGetSerializer(bill, many=True)
+        queue.send_message(MessageBody='boto3', MessageAttributes={
+            'Email': {
+                'StringValue': '{email}'.format(email=request.user),
+                'DataType': 'String'
+            },
+            'Bills': {
+                'StringValue': '{uuid}'.format(uuid=bill_uuids),
+                'DataType': 'String'
+            }
+        })
+        sns_publish_for_lambda.delay()
+        return Response(serializer.data)

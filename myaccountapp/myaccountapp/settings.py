@@ -14,6 +14,8 @@ import os
 import logging.config
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+import urllib
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.relpath(__file__)))
 
 # Quick-start development settings - unsuitable for production
@@ -203,3 +205,9 @@ if 'DB_HOST' in os.environ:
             }
         }
     })
+
+
+CELERY_BROKER_URL = 'amqp://guest:guest@localhost'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_RESULT_BACKEND = 'db+sqlite:///results.sqlite'
+CELERY_TASK_SERIALIZER = 'json'

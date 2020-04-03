@@ -24,6 +24,10 @@ jobs:
             sudo pip install django-storages
             sudo pip install pymysql
             sudo pip install django-statsd==2.5.0
+            sudo pip install celery==4.4.2
+            sudo pip install sqlalchemy
+            sudo apt-get install rabbitmq-server -y
+            sudo apt-get -y install libcurl4-openssl-dev libssl-dev python3-dev
       - run:
       # Our primary container isn't MYSQL so run a sleep command until it's ready.
           name: Waiting for MySQL to be ready
@@ -73,6 +77,11 @@ jobs:
             sudo pip install django-storages
             sudo pip install pymysql
             sudo pip install django-statsd==2.5.0
+            sudo pip install celery==4.4.2
+            sudo pip install sqlalchemy
+            sudo apt-get install rabbitmq-server -y
+            sudo apt-get -y install libcurl4-openssl-dev libssl-dev python3-dev
+
       - run:
           name: Zip Artifact
           command: |
