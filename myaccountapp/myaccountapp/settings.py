@@ -122,6 +122,7 @@ if 'DB_HOST' in os.environ:
             'USER': os.environ['DB_USERNAME'],
             'PASSWORD': os.environ['DB_PASSWORD'],
             'HOST': os.environ['DB_HOST'],
+            'OPTIONS': {'ssl': {'key': '/mysql-certs/rds-combined-ca-bundle.pem'}}
         }
     }
 else:
