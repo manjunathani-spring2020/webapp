@@ -93,7 +93,7 @@ jobs:
             cd scripts
             chmod +x *.sh
             cd ..
-            zip -r csye6225-web-app-${CIRCLE_BUILD_NUM}.zip myaccountapp scripts *.yml
+            zip -r csye6225-web-app-${CIRCLE_BUILD_NUM}.zip myaccountapp mysql-certs scripts *.yml
             mv csye6225-web-app-${CIRCLE_BUILD_NUM}.zip codedeploy_artifact/
             cd codedeploy_artifact
             ls -al
